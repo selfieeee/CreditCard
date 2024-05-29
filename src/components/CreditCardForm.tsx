@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import cardImage from '../assets/card-image.webp';
 
 interface CreditCardFormProps {}
@@ -54,7 +54,7 @@ const Input = styled.input<{ hasValue: boolean }>`
   background: rgba(255, 255, 255, 0.8);
   ${(props) =>
     props.hasValue &&
-    `background: rgba(255, 255, 255, 1);`
+    css`background: rgba(255, 255, 255, 1);`
   }
 `;
 
@@ -102,6 +102,22 @@ const CreditCardForm: React.FC<CreditCardFormProps> = () => {
   const [cvv, setCvv] = useState('');
   const [cardHolder, setCardHolder] = useState('');
 
+  const handleCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let value = e.target.value.replace(/\D/g, '');
+    value = value.substring(0, 16);
+    const formattedValue = value.replace(/(\d{4})(?=\d)/g, '$1 ');
+    setCardNumber(formattedValue);
+  };
+
+  const handleExpiryDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let value = e.target.value.replace(/\D/g, '');
+    value = value.substring(0, 4);
+    if (value.length > 2) {
+      value = value.replace(/(\d{2})(\d{1,2})/, '$1/$2');
+    }
+    setExpiryDate(value);
+  };
+
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
     // Валидация формы
@@ -112,9 +128,9 @@ const CreditCardForm: React.FC<CreditCardFormProps> = () => {
   };
 
   const validateForm = () => {
-    // логика валидации здесь
+    // Добавьте свою логику валидации здесь
     let isValid = true;
-    if (!cardNumber.match(/^\d{16}$/)) {
+    if (!cardNumber.match(/^\d{4} \d{4} \d{4} \d{4}$/)) {
       isValid = false;
       alert('Invalid card number');
     }
@@ -143,8 +159,7 @@ const CreditCardForm: React.FC<CreditCardFormProps> = () => {
             type="text"
             id="cardNumber"
             value={cardNumber}
-            onChange={(e) => setCardNumber(e.target.value)}
-            maxLength={16}
+            onChange={handleCardNumberChange}
             required
             hasValue={cardNumber !== ''}
           />
@@ -155,8 +170,7 @@ const CreditCardForm: React.FC<CreditCardFormProps> = () => {
             type="text"
             id="expiryDate"
             value={expiryDate}
-            onChange={(e) => setExpiryDate(e.target.value)}
-            maxLength={5}
+            onChange={handleExpiryDateChange}
             required
             hasValue={expiryDate !== ''}
           />
